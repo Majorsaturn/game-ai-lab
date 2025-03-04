@@ -118,13 +118,14 @@ def retrieve_context(collection: chromadb.Collection, query: str, n_results: int
     """
     Retrieve relevant context from ChromaDB based on the query
     """
-    res = collection.query(
-    query_texts=[query],
-    n_results=n_results,
-    where={"metadata_field": "is_equal_to_this"},
-    where_document={"$contains":"search_string"}
-    )
-    return res
+    results = collection.query(query_texts=[query], n_results=n_results)
+
+    contexts = [
+        metadata["source"] + " - Chunk " + str(metadata["chunk"]) + ": " + text
+        for metadata_list, text_list in zip(results["metadatas"], results["documents"])
+        for metadata, text in zip(metadata_list, text_list) 
+    ]
+    return contexts
 
 
 
